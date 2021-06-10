@@ -39,3 +39,5 @@ doc/xml-java
 doc/xml-dotnet
 convert_graphdef_memmapped_format
 native_client/swift/deepspeech_ios.framework/deepspeech_ios
+data/lingua_libre/
+data/ldc93s1/

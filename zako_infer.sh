@@ -1,6 +1,8 @@
 #!/bin/bash
+model_path_c="export_dir/output_graph.pbmm"
+
 ctx="cpu"
-model_path="export_dir/output_graph.pbmm"
+model_path="${model_path_c}"
 scorer_path=""
 audio="data/nagranie1.wav"
 
@@ -28,35 +30,32 @@ do
 shift
 done
 
-if [[ "$CONDA_PREFIX" == "" ]]
+if [ ! -f "${model_path}" ]
 then
-    source ./zako_env.sh
+    if [[ "${model_path}" == "${model_path_c}" ]]
+    then
+        ./zako_export.sh
+    else
+        echo "Wrong model path"
+        exit 1
+    fi
 fi
 
-if [[ "$CONDA_PREFIX" != "" ]]
+env_name="zako_infer_${ctx}"
+source ./zako_env.sh ${env_name}
+
+if [[ $(basename "${CONDA_PREFIX}") == "${env_name}" ]]
 then
-    if [ ! -f "${model_path}" ]
-    then
-        if [[ "${model_path}" == "export_dir/output_graph.pbmm" ]]
-        then
-            ./zako_export.sh
-        else
-            echo "Wrong model path"
-            exit 1
-        fi
-    fi
-
-    pip show deepspeech-training &> /dev/null && yes | pip uninstall deepspeech-training
-
     if [[ "$ctx" == "gpu" ]]
     then
-        pip show deepspeech &> /dev/null && yes | pip uninstall deepspeech
-        pip show deepspeech-gpu &> /dev/null || conda install -y cudnn=7.6.5=cuda10.1_0 & \
-            yes | pip install deepspeech-gpu==0.9.3
+        if ! pip show deepspeech-gpu &> /dev/null
+        then 
+            conda install -y cudnn=7.6.5=cuda10.1_0 && yes | pip install deepspeech-gpu==0.9.3
+        fi
     else
-        pip show deepspeech-gpu &> /dev/null && yes | pip uninstall deepspeech-gpu
         pip show deepspeech &> /dev/null || yes | pip install deepspeech==0.9.3
     fi
+    
     scorer_arg=""
     if [[ "$scorer_path" != "" ]]
     then
@@ -64,4 +63,6 @@ then
     fi
     echo "deepspeech --model $model_path $scorer_arg --audio $audio"
     deepspeech --model ${model_path} ${scorer_arg} --audio ${audio}
+else
+    echo "Environment error"
 fi

@@ -7,8 +7,8 @@ then
 fi
 eval "$(conda shell.bash hook)"
 
-if ! conda activate zakods &> /dev/null
+if [[ $(basename "${CONDA_PREFIX}") != "$1" ]] && ! conda activate ${1} &> /dev/null
 then
-    conda create -y --name zakods python=3.6
-    conda activate zakods
+    conda create -y --name ${1} python=3.6
+    conda activate ${1}
 fi

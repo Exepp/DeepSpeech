@@ -1,14 +1,9 @@
 #!/bin/bash
 
-if [[ "$CONDA_PREFIX" == "" ]]
-then
-    source ./zako_env.sh
-fi
+source ./zako_env.sh zako_export
 
-if [[ "$CONDA_PREFIX" != "" ]]
+if [[ $(basename "${CONDA_PREFIX}") == "zako_export" ]]
 then
-    pip show deepspeech &> /dev/null && yes | pip uninstall deepspeech
-    pip show deepspeech-gpu &> /dev/null && yes | pip uninstall deepspeech-gpu
     pip show deepspeech-training &> /dev/null || yes | pip install -e .
 
     if [[ "$1" == "tflite" ]]
@@ -19,4 +14,6 @@ then
         python3 util/taskcluster.py --source tensorflow --artifact convert_graphdef_memmapped_format --branch r1.15 --target . && \
         ./convert_graphdef_memmapped_format --in_graph=export_dir/output_graph.pb --out_graph=export_dir/output_graph.pbmm
     fi
+else
+    echo "Environment error"
 fi

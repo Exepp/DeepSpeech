@@ -40,6 +40,12 @@ then
         exit 1
     fi
 fi
+model_extension="$(basename ${model_path})"
+model_extension="${model_extension##*.}"
+if [[ "${model_extension}" == "tflite" ]]
+then
+    ctx="cpu"
+fi
 
 env_name="zako_infer_${ctx}"
 source ./zako_env.sh ${env_name}
@@ -53,7 +59,14 @@ then
             conda install -y cudnn=7.6.5=cuda10.1_0 && yes | pip install deepspeech-gpu==0.9.3
         fi
     else
-        pip show deepspeech &> /dev/null || yes | pip install deepspeech==0.9.3
+        if [[ "${model_extension}" == "tflite" ]]
+        then
+            pip show deepspeech &> /dev/null && yes | pip uninstall deepspeech
+            pip show deepspeech-tflite &> /dev/null || yes | pip install deepspeech-tflite==0.9.3
+        else
+            pip show deepspeech-tflite &> /dev/null && yes | pip uninstall deepspeech-tflite
+            pip show deepspeech &> /dev/null || yes | pip install deepspeech==0.9.3
+        fi
     fi
     
     scorer_arg=""

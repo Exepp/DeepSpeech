@@ -72,10 +72,10 @@ then
     scorer_arg=""
     if [[ "$scorer_path" != "" ]]
     then
-        scorer_arg="--scorer $scorer_path"
+        scorer_arg="--scorer \"$scorer_path\""
     fi
-    echo "deepspeech --model $model_path $scorer_arg --audio $audio"
-    deepspeech --model ${model_path} ${scorer_arg} --audio ${audio}
+    echo "deepspeech --model \"$model_path\" $scorer_arg --audio \"$audio\""
+    deepspeech --model "${model_path}" ${scorer_arg} --audio "${audio}"
 else
     echo "Environment error"
 fi
